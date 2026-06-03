@@ -29,10 +29,37 @@ func getDataFromLink(link string) *models.QuestionData {
 		allQuestions = append(allQuestions, utils.CleanText(s.Text()))
 	})
 
-	answerText := strings.TrimSpace(doc.Find(".correct-answer").Text())
+	// ExamTopics now embeds the community-voted answer in a hidden JSON
+	// <script> inside .voted-answers-tally instead of the old .correct-answer.
 	answer := ""
-	if len(answerText) > 0 {
-		answer = string(strings.ReplaceAll(strings.ReplaceAll(answerText, " ", ""), "\n", "")[0])
+	jsonText := strings.TrimSpace(doc.Find(".voted-answers-tally script").First().Text())
+	if jsonText != "" {
+		var votes []struct {
+			VotedAnswers string `json:"voted_answers"`
+			VoteCount    int    `json:"vote_count"`
+			IsMostVoted  bool   `json:"is_most_voted"`
+		}
+		if err := json.Unmarshal([]byte(jsonText), &votes); err != nil {
+			log.Printf("failed to parse voted-answers JSON for %s: %v", link, err)
+		} else {
+			for _, v := range votes {
+				if v.IsMostVoted {
+					answer = v.VotedAnswers
+					break
+				}
+			}
+			if answer == "" && len(votes) > 0 {
+				answer = votes[0].VotedAnswers
+			}
+		}
+	}
+
+	// Fallback to the legacy selector if the JSON tally is absent.
+	if answer == "" {
+		answerText := strings.TrimSpace(doc.Find(".correct-answer").Text())
+		if len(answerText) > 0 {
+			answer = string(strings.ReplaceAll(strings.ReplaceAll(answerText, " ", ""), "\n", "")[0])
+		}
 	}
 
 	return &models.QuestionData{
