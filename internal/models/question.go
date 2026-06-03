@@ -1,14 +1,14 @@
 package models
 
 type QuestionData struct {
-	Title        string
-	Header       string
-	Content      string
-	Questions    []string
-	Answer       string
-	Timestamp    string
-	QuestionLink string
-	Comments     string
+	Title        string   `json:"title"`
+	Header       string   `json:"header"`
+	Content      string   `json:"content"`
+	Questions    []string `json:"questions"`
+	Answer       string   `json:"answer"`
+	Timestamp    string   `json:"timestamp"`
+	QuestionLink string   `json:"question_link"`
+	Comments     string   `json:"comments"`
 }
 
 type FileInfo struct {
