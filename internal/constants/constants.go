@@ -4,8 +4,8 @@ import "time"
 
 // Request behaviour
 const HttpTimeout = 20 * time.Second
-const MaxConcurrentRequests = 15
-const RequestsPerSecond = 2.0
+const MaxConcurrentRequests = 10
+const RequestsPerSecond = 5.0
 const MaxRetries = 3
 
 // Backoff configuration
